@@ -22,23 +22,29 @@
 
   <!-- Intro -->
   <section class="screen screen-intro" id="screen-intro">
-    <div class="intro-hero">
-      <div class="gem-logo" aria-hidden="true"></div>
-      <p class="eyebrow">The Best of Bucknell</p>
+    <figure class="intro-photo">
+      <img src="images/taylor-hall.jpg" width="1200" height="1500"
+        alt="The carved stone arch reading TAYLOR HALL over a brick entrance, framed by crabapple branches">
+      <figcaption>Taylor Hall, 1849<span class="cap-long">, the first building on College Hill</span>. The hunt starts next door.</figcaption>
+    </figure>
+    <div class="intro-copy">
+      <p class="eyebrow brand">
+        <svg class="mark" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1 19 7.5 10 19 1 7.5Z" fill="#003865"/><path d="M10 1 19 7.5H10Z M1 7.5H10V19Z" fill="#e87722"/></svg>
+        A Bucknell campus photo hunt
+      </p>
       <h1 id="intro-title">Hidden Gems</h1>
-      <p class="lede">A photo hunt to the corners of campus most people walk right past.</p>
+      <p class="lede"><span id="stop-count">Four</span> corners of campus most people walk right past, and a clue to each one.</p>
+      <ol class="how">
+        <li><span class="num">1</span><p><strong>Follow the clue.</strong> Find a hidden corner of campus.</p></li>
+        <li><span class="num">2</span><p><strong>Capture the spot.</strong> Take a photo when you arrive.</p></li>
+        <li><span class="num">3</span><p><strong>Unlock the next stop.</strong> We check your location and photo, then the next clue opens.</p></li>
+      </ol>
+      <div class="intro-actions">
+        <button class="btn btn-primary" id="btn-resume" hidden>Continue your hunt</button>
+        <button class="btn btn-primary" id="btn-start">Start the hunt</button>
+        <p class="fineprint">Uses your camera and location during the hunt. Photos stay on your phone.</p>
+      </div>
     </div>
-    <ol class="how">
-      <li><span>1</span><div><strong>Solve the clue</strong> to find a hidden spot.</div></li>
-      <li><span>2</span><div><strong>Snap a photo</strong> when you get there.</div></li>
-      <li><span>3</span><div><strong>We check it</strong> — right place, right shot — and the next clue unlocks.</div></li>
-    </ol>
-    <p class="fineprint">You'll be asked for your location and camera. Your photos stay on your phone.</p>
-    <div class="actions">
-      <button class="btn btn-primary" id="btn-start">Start the hunt</button>
-      <button class="btn btn-ghost" id="btn-resume" hidden>Continue where I left off</button>
-    </div>
-    <p class="model-status" id="model-status" aria-live="polite"></p>
   </section>
 
   <!-- Clue -->
@@ -89,7 +95,6 @@
 
   <!-- Found -->
   <section class="screen screen-found" id="screen-found" hidden>
-    <div class="burst" aria-hidden="true"></div>
     <p class="eyebrow" id="found-counter"></p>
     <h2 id="found-name"></h2>
     <img class="found-photo" id="found-photo" alt="">

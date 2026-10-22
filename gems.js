@@ -17,7 +17,7 @@
 
 export const HUNT = {
   title: 'Hidden Gems',
-  subtitle: 'The Best of Bucknell',
+  subtitle: 'A Bucknell campus photo hunt',
   // Judges test the first gem at the showcase, so it must stay within 500 ft.
   taylorHall: { lat: 40.95716, lng: -76.8831 },
 };

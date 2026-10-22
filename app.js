@@ -10,9 +10,11 @@ const MAX_PHOTO_PX = 1280;
 const FIX_MAX_AGE_MS = 15000;
 const NO_GPS_STRICTNESS = 0.05; // photo-only checks need a closer match
 const KEEP_AFTER_FAILS = 3;
+const GPS_SLOW_MS = 15000;
 
 let progress = loadProgress();
 let lastFix = null;      // {lat, lng, accuracy, at} or {denied: true}
+let gpsSlow = false;     // no fix yet after GPS_SLOW_MS on this clue
 let stopWatch = () => {};
 let modelState = 'loading';
 let pending = null;      // the photo being checked: {blob, url}
@@ -55,27 +57,45 @@ const feet = (m) => {
 
 /* ---------- intro ---------- */
 
+const inProgress = () => Boolean(progress.startedAt && !progress.finishedAt);
+
 function renderIntro() {
-  const inProgress = progress.startedAt && !progress.finishedAt;
-  $('btn-resume').hidden = !inProgress;
-  $('btn-start').textContent = inProgress ? 'Start over' : 'Start the hunt';
-  $('btn-start').className = inProgress ? 'btn btn-ghost' : 'btn btn-primary';
-  $('btn-resume').className = 'btn btn-primary';
-  if (inProgress) $('btn-resume').after($('btn-start'));
+  const resuming = inProgress();
+  $('btn-resume').hidden = !resuming;
+  $('btn-resume').textContent = `Continue your hunt · stop ${progress.index + 1} of ${GEMS.length}`;
+  $('btn-start').textContent = resuming ? 'Start over' : 'Start the hunt';
+  $('btn-start').className = resuming ? 'btn btn-ghost' : 'btn btn-primary';
+  const words = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
+  $('stop-count').textContent = words[GEMS.length] || String(GEMS.length);
   show('intro');
   shutter($('intro-title'), HUNT.title);
 }
 
+// Destructive buttons need a second tap within 3 s, so a stray tap can't wipe
+// a hunt in progress.
+const armed = new WeakMap();
+function armConfirm(btn, label, confirmLabel, onConfirm) {
+  const disarm = () => {
+    clearTimeout(armed.get(btn));
+    armed.delete(btn);
+    btn.textContent = label;
+    btn.classList.remove('armed');
+  };
+  if (armed.has(btn)) {
+    disarm();
+    onConfirm();
+    return;
+  }
+  btn.textContent = confirmLabel;
+  btn.classList.add('armed');
+  armed.set(btn, setTimeout(disarm, 3000));
+}
+
+// Loads quietly in the background; if it fails, the photo step says so.
 function warmUpModel() {
-  const status = $('model-status');
-  status.textContent = 'Getting the photo checker ready…';
-  loadModel().then(() => {
-    modelState = 'ready';
-    status.textContent = 'Photo checker ready ✓';
-  }, (err) => {
+  loadModel().then(() => { modelState = 'ready'; }, (err) => {
     console.error(err);
     modelState = 'failed';
-    status.textContent = 'Photo checker could not load. You can still play — we will check your location only.';
   });
 }
 
@@ -132,7 +152,9 @@ function renderHeat() {
     label.textContent = 'Location is off — we will check your photo only.';
   } else if (!lastFix) {
     heat.dataset.level = '';
-    label.textContent = 'Finding your location…';
+    label.textContent = gpsSlow
+      ? 'Still looking for GPS. Step into the open, or take the photo anyway — we\'ll check it.'
+      : 'Finding your location…';
   } else {
     const p = proximityLabel(distanceM(lastFix, gem));
     heat.dataset.level = String(p.level);
@@ -143,19 +165,22 @@ function renderHeat() {
 function showClue() {
   const gem = GEMS[progress.index];
   renderFacets($('facets'), progress.index, progress.index);
-  $('clue-counter').textContent = `Gem ${progress.index + 1} of ${GEMS.length}`;
+  $('clue-counter').textContent = `Stop ${progress.index + 1} of ${GEMS.length}`;
   $('clue-text').textContent = gem.clue;
   renderHints();
   show('clue');
+  gpsSlow = false;
   renderHeat();
   stopWatch();
-  stopWatch = watchPosition((fix) => {
+  const stopGps = watchPosition((fix) => {
     lastFix = { ...fix, at: Date.now() };
     renderHeat();
   }, () => {
     lastFix = { denied: true };
     renderHeat();
   });
+  const slowTimer = setTimeout(() => { gpsSlow = true; renderHeat(); }, GPS_SLOW_MS);
+  stopWatch = () => { stopGps(); clearTimeout(slowTimer); };
   // Fingerprint the reference photos now so the check is instant later; the
   // check compares against every gem, current one first.
   if (modelState !== 'failed') {
@@ -200,7 +225,7 @@ async function checkLocation(gem, index) {
   if (!fix) return { status: 'unavailable', text: 'Location unavailable — checking the photo only' };
   const { near, distance } = isNear(fix, gem);
   return near
-    ? { status: 'pass', distance, text: 'You are in the right place' }
+    ? { status: 'pass', distance, text: 'GPS puts you within range of this stop' }
     : { status: 'fail', distance, text: `About ${feet(distance)} away` };
 }
 
@@ -221,8 +246,9 @@ async function checkPhoto(gem, img, strict) {
     const need = gem.threshold + (strict ? NO_GPS_STRICTNESS : 0);
     const pass = score >= need && score >= rival;
     const detail = judge ? ` (score ${score.toFixed(2)} / need ${need.toFixed(2)}, best other ${rival.toFixed(2)})` : '';
-    const why = score >= need ? 'This looks more like a different spot' : 'This does not look like the spot yet';
-    return { status: pass ? 'pass' : 'fail', score, text: (pass ? 'Looks like the spot' : why) + detail };
+    const otherStop = score >= need && score < rival;
+    const why = otherStop ? 'This looks more like a different stop' : 'This does not look like the spot yet';
+    return { status: pass ? 'pass' : 'fail', score, otherStop, text: (pass ? 'Looks like the spot' : why) + detail };
   } catch (e) {
     console.error(e);
     return { status: 'unavailable', text: 'Photo checker hit a snag' };
@@ -271,7 +297,10 @@ async function onPhotoChosen(file) {
   let title, body;
   if (loc.status === 'fail') {
     title = 'Not quite here';
-    body = `You are about ${feet(loc.distance)} from the gem. Re-read the clue and follow the heat meter — it glows hotter as you get close.`;
+    body = `GPS puts you about ${feet(loc.distance)} from this stop (GPS can be off by a few dozen feet). Re-read the clue and follow the heat meter — it glows hotter as you get close.`;
+  } else if (pic.otherStop) {
+    title = 'That looks like a different stop';
+    body = 'Re-read the clue: it says exactly what to capture. Get that in the middle of the frame and try again.';
   } else {
     title = 'Close, but not that shot';
     body = 'Frame the thing the clue describes so it fills most of the photo, in good light, and try again.';
@@ -300,7 +329,7 @@ async function acceptPhoto(verified, info = {}) {
 
 function showFound(gem) {
   const last = progress.index >= GEMS.length;
-  $('found-counter').textContent = `Gem ${progress.index} of ${GEMS.length} found`;
+  $('found-counter').textContent = `Stop ${progress.index} of ${GEMS.length} · found`;
   shutter($('found-name'), gem.name);
   $('found-photo').src = pending.url;
   $('found-fact').textContent = gem.fact;
@@ -345,6 +374,7 @@ async function showAlbum() {
 }
 
 function confetti() {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const c = $('confetti');
   const ctx = c.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
@@ -374,29 +404,25 @@ function confetti() {
   })(performance.now());
 }
 
-let resetArmed = null;
 function onReset() {
-  const btn = $('btn-reset');
-  if (!resetArmed) {
-    btn.textContent = 'Tap again to erase this album';
-    resetArmed = setTimeout(() => { resetArmed = null; btn.textContent = 'Play again'; }, 3000);
-    return;
-  }
-  clearTimeout(resetArmed);
-  resetArmed = null;
-  btn.textContent = 'Play again';
-  progress = freshProgress();
-  saveProgress(progress);
-  clearPhotos();
-  renderIntro();
+  armConfirm($('btn-reset'), 'Play again', 'Tap again to erase this album', () => {
+    progress = freshProgress();
+    saveProgress(progress);
+    clearPhotos();
+    renderIntro();
+  });
 }
 
 /* ---------- wiring ---------- */
 
-$('btn-start').addEventListener('click', () => {
+function beginHunt() {
   // Ask for location now (during a tap) so the prompt isn't a surprise later.
   getPosition({ timeout: 8000 }).then((p) => { if (p) lastFix = p.denied ? p : { ...p, at: Date.now() }; });
   startHunt();
+}
+$('btn-start').addEventListener('click', () => {
+  if (inProgress()) armConfirm($('btn-start'), 'Start over', 'Tap again to erase your progress', beginHunt);
+  else beginHunt();
 });
 $('btn-resume').addEventListener('click', () => (progress.finishedAt ? showAlbum() : showClue()));
 $('btn-hint').addEventListener('click', () => {
