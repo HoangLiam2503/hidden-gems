@@ -1,3 +1,4 @@
 .DS_Store
 .devtest/
 __pycache__/
+gems/*.jpg

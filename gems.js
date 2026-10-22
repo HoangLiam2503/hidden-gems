@@ -1,8 +1,8 @@
 // Hunt data. Everything a team needs to edit lives here.
 //
-// DRAFT: coordinates come from the Bucknell campus-map building list (building
-// centroids). Re-measure each spot with tools/scout.html before the showcase,
-// add 3-4 reference photos per gem, and tune threshold with the scout tool.
+// Coordinates were measured on site with tools/scout.html. Thresholds were
+// calibrated from the reference photos (leave-one-out); re-check them with the
+// scout tool on a real phone before the showcase.
 //
 // Fields:
 //   id        folder name under gems/ (reference photos live in gems/<id>/)
@@ -24,59 +24,59 @@ export const HUNT = {
 
 export const GEMS = [
   {
+    id: 'botany',
+    name: 'Where Careers Take Root',
+    clue: 'Start small. In the shadow of the oldest hall hides a little brick house named for the science of leaves. These days it grows something else. Find the word above its door.',
+    hints: [
+      'It\'s right next to Taylor Hall.',
+      'Look for an orange picnic table and the word BOTANY.',
+    ],
+    lat: 40.956861, lng: -76.882971,
+    radiusM: 35,
+    threshold: 0.58,
+    refs: ['ref1.jpg', 'ref2.jpg', 'ref3.jpg'],
+    fact: 'The Botany Building is named for the study of plants, but today it houses the Center for Career Advancement. Students still come here to grow.',
+  },
+  {
     id: 'taylor',
     name: 'Where It All Began',
-    clue: 'Before the Quad, before the Bison, one building stood alone on the hill. Find the oldest walls on campus and photograph the doorway that started it all.',
+    clue: 'Don\'t go far: turn around. Your next gem has stood on this hill longer than any other building. Its name is carved into a curved stone arch. Capture the arch.',
     hints: [
-      'It was built in 1849 and named for the man who wrote the University charter.',
-      'You may be standing in it right now. Look for Taylor Hall\'s main entrance.',
+      'Built in 1849, named for the man who wrote the University\'s charter.',
+      'Find TAYLOR HALL carved above the entrance. Judges: you may be sitting in it.',
     ],
-    lat: 40.95716, lng: -76.8831,
-    radiusM: 45,
+    lat: 40.956922, lng: -76.882967,
+    radiusM: 35,
     threshold: 0.6,
-    refs: [],
-    fact: 'Taylor Hall (1849) was the first building on College Hill. Everything else grew around it.',
+    refs: ['ref1.jpg', 'ref2.jpg', 'ref3.jpg'],
+    fact: 'Taylor Hall (1849) was the first building on College Hill, named for Stephen W. Taylor, author of the University\'s charter.',
   },
   {
-    id: 'greenhouse',
-    name: 'The Jungle on the Roof',
-    clue: 'Somewhere above the lab benches, it is always summer. Climb toward the glass and photograph the green.',
+    id: 'weeping',
+    name: 'The Tree in a Stone Cloak',
+    clue: 'Head downhill toward the science buildings. One tree here refuses to stand up straight. It weeps inside its own ring of stone. Photograph its whole cloak.',
     hints: [
-      'Science lives next door to the oldest hall on campus. Look up.',
-      'The Biology Building has a rooftop greenhouse.',
+      'It\'s on the lawn between Taylor and the Rooke Science Center.',
+      'Look for a curved fieldstone wall.',
     ],
-    lat: 40.956233, lng: -76.883091,
-    radiusM: 50,
-    threshold: 0.6,
-    refs: [],
-    fact: 'The Biology Building opened in 1991 with a greenhouse on its roof.',
+    lat: 40.956398, lng: -76.883258,
+    radiusM: 35,
+    threshold: 0.69,
+    refs: ['ref1.jpg', 'ref2.jpg', 'ref3.jpg'],
+    fact: 'Hundreds of students walk past this tiny walled garden every day on the way to class, and almost none of them look up.',
   },
   {
-    id: 'art',
-    name: 'Studio Since 1890',
-    clue: 'This building has made artists for more than a century. Find its oldest face and capture it.',
+    id: 'chalk',
+    name: 'The Elements Underfoot',
+    clue: 'Final gem. Science left a message on the ground: a rainbow grid of chemical symbols at the foot of the grand staircase. Find where Uranium meets Neptunium.',
     hints: [
-      'Head toward Seventh Street, uphill from Taylor.',
-      'It is the Art Building.',
+      'The building with the giant columns: Robert L. Rooke Science Center.',
+      'Look down at the plaza at the bottom of the steps.',
     ],
-    lat: 40.95805, lng: -76.88389,
-    radiusM: 40,
-    threshold: 0.6,
-    refs: [],
-    fact: 'The Art Building was built in 1890 and still holds studios and classrooms.',
-  },
-  {
-    id: 'maproom',
-    name: 'The Room Under the Books',
-    clue: 'Go below the place everyone studies. Behind a quiet door, the whole world is folded into drawers.',
-    hints: [
-      'Bertrand Library has more floors than most people visit.',
-      'Lower Level One: the Map Room.',
-    ],
-    lat: 40.95434, lng: -76.88265,
-    radiusM: 60,
-    threshold: 0.6,
-    refs: [],
-    fact: 'Bertrand Library\'s Map Room has reference maps, a computer table, and one of the comfiest couches on campus.',
+    lat: 40.956153, lng: -76.883408,
+    radiusM: 35,
+    threshold: 0.63,
+    refs: ['ref1.jpg', 'ref2.jpg', 'ref3.jpg'],
+    fact: 'Uranium (U), Neptunium (Np) and Plutonium (Pu) are elements 92, 93 and 94, named in order after Uranus, Neptune and Pluto. Here they sit side by side in chalk.',
   },
 ];

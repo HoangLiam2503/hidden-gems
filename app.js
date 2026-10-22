@@ -154,8 +154,13 @@ function showClue() {
     lastFix = { denied: true };
     renderHeat();
   });
-  // Fingerprint this gem's reference photos now so the check is instant later.
-  if (modelState !== 'failed') refEmbeddings(gem).catch((e) => console.error(e));
+  // Fingerprint the reference photos now so the check is instant later; the
+  // check compares against every gem, current one first.
+  if (modelState !== 'failed') {
+    [gem, ...GEMS.filter((g) => g !== gem)].reduce(
+      (p, g) => p.then(() => refEmbeddings(g)), Promise.resolve(),
+    ).catch((e) => console.error(e));
+  }
 }
 
 /* ---------- photo check ---------- */
@@ -200,12 +205,22 @@ async function checkLocation(gem, index) {
 async function checkPhoto(gem, img, strict) {
   if (modelState === 'failed') return { status: 'unavailable', text: 'Photo checker unavailable' };
   try {
-    const score = await scorePhoto(await embedImage(img), gem);
+    const emb = await embedImage(img);
+    const score = await scorePhoto(emb, gem);
     if (score === null) return { status: 'skip', text: 'No reference photos for this gem yet' };
+    // Neighbouring gems can look alike (Botany and Taylor are both brick and
+    // trim), so the photo must also match this gem better than any other.
+    let rival = -1;
+    for (const other of GEMS) {
+      if (other.id === gem.id) continue;
+      const s = await scorePhoto(emb, other);
+      if (s !== null) rival = Math.max(rival, s);
+    }
     const need = gem.threshold + (strict ? NO_GPS_STRICTNESS : 0);
-    const pass = score >= need;
-    const detail = judge ? ` (score ${score.toFixed(2)} / need ${need.toFixed(2)})` : '';
-    return { status: pass ? 'pass' : 'fail', score, text: (pass ? 'Looks like the spot' : 'This does not look like the spot yet') + detail };
+    const pass = score >= need && score >= rival;
+    const detail = judge ? ` (score ${score.toFixed(2)} / need ${need.toFixed(2)}, best other ${rival.toFixed(2)})` : '';
+    const why = score >= need ? 'This looks more like a different spot' : 'This does not look like the spot yet';
+    return { status: pass ? 'pass' : 'fail', score, text: (pass ? 'Looks like the spot' : why) + detail };
   } catch (e) {
     console.error(e);
     return { status: 'unavailable', text: 'Photo checker hit a snag' };

@@ -128,10 +128,14 @@
       const emb = await embedImage(await loadImage(url));
       const body = $('scores').querySelector('tbody');
       body.innerHTML = '';
-      for (const g of GEMS) {
-        const s = await scorePhoto(emb, g);
+      const scores = [];
+      for (const g of GEMS) scores.push(await scorePhoto(emb, g));
+      const top = Math.max(...scores.filter((s) => s !== null));
+      for (const [i, g] of GEMS.entries()) {
+        const s = scores[i];
         const tr = document.createElement('tr');
-        const pass = s !== null && s >= g.threshold;
+        // Same rule as the game: over the threshold AND the best match of all gems.
+        const pass = s !== null && s >= g.threshold && s >= top;
         tr.innerHTML = `<td>${g.id === selected().id ? '<b>' + g.id + '</b>' : g.id}</td><td>${s === null ? 'no refs' : s.toFixed(3)}</td><td>${g.threshold}</td><td class="${pass ? 'pass' : 'fail'}">${s === null ? '' : pass ? 'PASS' : 'fail'}</td>`;
         body.appendChild(tr);
       }
