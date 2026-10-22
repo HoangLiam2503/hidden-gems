@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Hidden Gems · Bucknell</title>
+  <meta name="description" content="A photo scavenger hunt to the corners of Bucknell most people walk past.">
+  <meta name="theme-color" content="#003865">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Hidden Gems">
+  <link rel="stylesheet" href="styles.css">
+  <script src="vendor/tf.min.js" defer></script>
+  <script src="app.js" type="module"></script>
+</head>
+<body>
+  <div class="judge-badge" id="judge-badge" hidden>Judge mode</div>
+
+  <!-- Intro -->
+  <section class="screen screen-intro" id="screen-intro">
+    <div class="intro-hero">
+      <div class="gem-logo" aria-hidden="true"></div>
+      <p class="eyebrow">The Best of Bucknell</p>
+      <h1>Hidden Gems</h1>
+      <p class="lede">A photo hunt to the corners of campus most people walk right past.</p>
+    </div>
+    <ol class="how">
+      <li><span>1</span><div><strong>Solve the clue</strong> to find a hidden spot.</div></li>
+      <li><span>2</span><div><strong>Snap a photo</strong> when you get there.</div></li>
+      <li><span>3</span><div><strong>We check it</strong> — right place, right shot — and the next clue unlocks.</div></li>
+    </ol>
+    <p class="fineprint">You'll be asked for your location and camera. Your photos stay on your phone.</p>
+    <div class="actions">
+      <button class="btn btn-primary" id="btn-start">Start the hunt</button>
+      <button class="btn btn-ghost" id="btn-resume" hidden>Continue where I left off</button>
+    </div>
+    <p class="model-status" id="model-status" aria-live="polite"></p>
+  </section>
+
+  <!-- Clue -->
+  <section class="screen screen-clue" id="screen-clue" hidden>
+    <header class="topbar">
+      <div class="facets" id="facets" aria-label="Progress"></div>
+      <p class="counter" id="clue-counter"></p>
+    </header>
+    <article class="card clue-card">
+      <p class="eyebrow">Clue</p>
+      <p class="clue-text" id="clue-text"></p>
+      <div class="hints" id="hints"></div>
+      <button class="btn btn-link" id="btn-hint">Need a hint?</button>
+    </article>
+    <div class="heat" id="heat" aria-live="polite">
+      <div class="heat-bar"><i></i><i></i><i></i><i></i><i></i></div>
+      <p class="heat-label" id="heat-label">Finding your location…</p>
+    </div>
+    <div class="actions sticky">
+      <label class="btn btn-primary btn-camera" for="photo-input">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 7.2 6H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3.2L15 4H9Zm3 4.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm0 2a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg>
+        I'm here — take the photo
+      </label>
+      <input type="file" id="photo-input" accept="image/*" capture="environment" hidden>
+    </div>
+  </section>
+
+  <!-- Checking / result -->
+  <section class="screen screen-check" id="screen-check" hidden>
+    <div class="photo-frame">
+      <img id="check-photo" alt="Your photo">
+      <div class="scan" id="scan"></div>
+    </div>
+    <ul class="checks">
+      <li id="check-loc"><span class="dot"></span><div><strong>Location</strong><small></small></div></li>
+      <li id="check-img"><span class="dot"></span><div><strong>Photo match</strong><small></small></div></li>
+    </ul>
+    <div class="result" id="result" hidden>
+      <h2 id="result-title"></h2>
+      <p id="result-body"></p>
+      <div class="actions">
+        <label class="btn btn-primary" for="photo-input" id="btn-retry">Try another photo</label>
+        <button class="btn btn-ghost" id="btn-back">Back to the clue</button>
+        <button class="btn btn-ghost" id="btn-keep" hidden>Keep this photo &amp; move on</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Found -->
+  <section class="screen screen-found" id="screen-found" hidden>
+    <div class="burst" aria-hidden="true"></div>
+    <p class="eyebrow" id="found-counter"></p>
+    <h2 id="found-name"></h2>
+    <img class="found-photo" id="found-photo" alt="">
+    <div class="card fact">
+      <p class="eyebrow">Hidden fact</p>
+      <p id="found-fact"></p>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" id="btn-next">Next clue</button>
+    </div>
+  </section>
+
+  <!-- Album -->
+  <section class="screen screen-album" id="screen-album" hidden>
+    <canvas class="confetti" id="confetti" aria-hidden="true"></canvas>
+    <p class="eyebrow">Hunt complete</p>
+    <h1>Your Hidden Gems</h1>
+    <p class="lede" id="album-summary"></p>
+    <div class="album-grid" id="album-grid"></div>
+    <div class="actions">
+      <button class="btn btn-primary" id="btn-share" disabled>Preparing your album…</button>
+      <button class="btn btn-ghost" id="btn-reset">Play again</button>
+    </div>
+  </section>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+</body>
+</html>

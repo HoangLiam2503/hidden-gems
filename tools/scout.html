@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hidden Gems · Scout</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .screen { gap: 16px; }
+    .row { display: flex; justify-content: space-between; gap: 12px; font-size: 15px; }
+    .row b { font-variant-numeric: tabular-nums; }
+    pre { margin: 0; padding: 12px; background: #10233a; color: #fff; border-radius: 12px; font-size: 13px; white-space: pre-wrap; word-break: break-all; }
+    table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    td, th { padding: 8px 6px; border-bottom: 1px solid var(--line); text-align: left; font-variant-numeric: tabular-nums; }
+    .pass { color: var(--ok); font-weight: 800; }
+    .fail { color: var(--bad); font-weight: 800; }
+    .preview { width: 100%; border-radius: 12px; display: block; }
+    select { font: 600 17px var(--sans); padding: 12px; border-radius: 12px; border: 2px solid var(--line); background: #fff; }
+  </style>
+  <script src="../vendor/tf.min.js" defer></script>
+</head>
+<body>
+  <section class="screen">
+    <p class="eyebrow">Team tool — not for players</p>
+    <h2>Scout a gem</h2>
+
+    <div class="card">
+      <p class="eyebrow">1 · Where am I?</p>
+      <div class="row"><span>Latitude</span><b id="lat">—</b></div>
+      <div class="row"><span>Longitude</span><b id="lng">—</b></div>
+      <div class="row"><span>Accuracy</span><b id="acc">—</b></div>
+      <div class="row"><span>From Taylor Hall</span><b id="taylor">—</b></div>
+      <div class="row"><span>From selected gem</span><b id="fromgem">—</b></div>
+      <p class="fineprint" style="text-align:left;margin-top:10px">Wait until accuracy is under ~10 m, then copy into gems.js. Gem 1 must be under 500 ft from Taylor Hall.</p>
+      <pre id="snippet">waiting for GPS…</pre>
+      <button class="btn btn-ghost" id="copy" style="margin-top:10px">Copy lat/lng</button>
+    </div>
+
+    <div class="card">
+      <p class="eyebrow">2 · Test a photo</p>
+      <p class="fineprint" style="text-align:left">Shoot the spot (right photos should pass) and nearby look-alikes (they should fail). Set each gem's threshold between the two.</p>
+      <select id="gem" style="width:100%;margin:10px 0"></select>
+      <label class="btn btn-primary" for="file">Take / choose a photo</label>
+      <input type="file" id="file" accept="image/*" capture="environment" hidden>
+      <p class="model-status" id="status">Loading model…</p>
+      <img class="preview" id="preview" alt="" hidden>
+      <table id="scores" hidden>
+        <thead><tr><th>Gem</th><th>Score</th><th>Need</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <button class="btn btn-ghost" id="share" style="margin-top:10px" hidden>Send this photo to my laptop</button>
+    </div>
+
+    <p class="fineprint">Add reference photos on your laptop with<br><code>python3 tools/add_refs.py &lt;gem-id&gt; photo1.jpg …</code></p>
+  </section>
+
+  <script type="module">
+    import { GEMS, HUNT } from '../gems.js';
+    import { watchPosition, distanceM } from '../geo.js';
+    import { loadModel, loadImage, embedImage, scorePhoto } from '../vision.js';
+    import { shareOrDownload } from '../album.js';
+
+    const $ = (id) => document.getElementById(id);
+    let fix = null, lastFile = null;
+
+    for (const g of GEMS) {
+      const o = document.createElement('option');
+      o.value = g.id;
+      o.textContent = `${g.id} — ${g.name} (${g.refs.length} refs)`;
+      $('gem').appendChild(o);
+    }
+    const selected = () => GEMS.find((g) => g.id === $('gem').value);
+
+    function renderFix() {
+      if (!fix) return;
+      $('lat').textContent = fix.lat.toFixed(6);
+      $('lng').textContent = fix.lng.toFixed(6);
+      $('acc').textContent = `${Math.round(fix.accuracy)} m`;
+      const ft = distanceM(fix, HUNT.taylorHall) * 3.281;
+      $('taylor').innerHTML = `${Math.round(ft)} ft <span class="${ft < 500 ? 'pass' : 'fail'}">${ft < 500 ? '✓' : '✕'}</span>`;
+      $('fromgem').textContent = `${Math.round(distanceM(fix, selected()))} m`;
+      $('snippet').textContent = `lat: ${fix.lat.toFixed(6)}, lng: ${fix.lng.toFixed(6)},`;
+    }
+    watchPosition((f) => { fix = f; renderFix(); });
+    $('gem').addEventListener('change', renderFix);
+    $('copy').addEventListener('click', () => navigator.clipboard?.writeText($('snippet').textContent));
+
+    loadModel().then(() => { $('status').textContent = 'Model ready'; }, (e) => { $('status').textContent = 'Model failed: ' + e.message; });
+
+    $('file').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      e.target.value = '';
+      if (!file) return;
+      lastFile = file;
+      const url = URL.createObjectURL(file);
+      $('preview').src = url;
+      $('preview').hidden = false;
+      $('status').textContent = 'Scoring…';
+      const emb = await embedImage(await loadImage(url));
+      const body = $('scores').querySelector('tbody');
+      body.innerHTML = '';
+      for (const g of GEMS) {
+        const s = await scorePhoto(emb, g);
+        const tr = document.createElement('tr');
+        const pass = s !== null && s >= g.threshold;
+        tr.innerHTML = `<td>${g.id === selected().id ? '<b>' + g.id + '</b>' : g.id}</td><td>${s === null ? 'no refs' : s.toFixed(3)}</td><td>${g.threshold}</td><td class="${pass ? 'pass' : 'fail'}">${s === null ? '' : pass ? 'PASS' : 'fail'}</td>`;
+        body.appendChild(tr);
+      }
+      $('scores').hidden = false;
+      $('share').hidden = false;
+      $('status').textContent = 'Only the selected (bold) gem should PASS.';
+    });
+
+    $('share').addEventListener('click', () => lastFile && shareOrDownload(lastFile));
+  </script>
+</body>
+</html>
