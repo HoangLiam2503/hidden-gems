@@ -216,3 +216,35 @@ h2 { font-size: 34px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* Shutter text (shutter.js): letters blur in while three slices sweep across */
+.shutter .sh-word { display: inline-block; white-space: nowrap; }
+.shutter .sh-char { position: relative; display: inline-block; overflow: hidden; }
+.shutter .sh-main {
+  display: inline-block;
+  animation: sh-in .8s ease-out calc(var(--d) + .3s) backwards;
+}
+.shutter .sh-top, .shutter .sh-mid, .shutter .sh-bot {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0;
+  animation: sh-sweep .7s ease-in-out var(--d) backwards;
+}
+.shutter .sh-top { color: var(--orange); clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%); }
+.shutter .sh-mid {
+  color: var(--navy-2); clip-path: polygon(0 35%, 100% 35%, 100% 65%, 0 65%);
+  animation-name: sh-sweep-back; animation-delay: calc(var(--d) + .1s);
+}
+.shutter .sh-bot {
+  color: var(--orange); clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+  animation-delay: calc(var(--d) + .2s);
+}
+@keyframes sh-in { from { opacity: 0; filter: blur(10px); } to { opacity: 1; filter: blur(0); } }
+@keyframes sh-sweep {
+  0% { transform: translateX(-100%); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+@keyframes sh-sweep-back {
+  0% { transform: translateX(100%); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateX(-100%); opacity: 0; }
+}

@@ -3,6 +3,7 @@ import { getPosition, isNear, proximityLabel, watchPosition, distanceM } from '.
 import { loadModel, loadImage, embedImage, scorePhoto, refEmbeddings, refUrl } from './vision.js';
 import { loadProgress, saveProgress, freshProgress, savePhoto, clearPhotos } from './store.js';
 import { albumEntries, buildCollage, shareOrDownload, formatDuration } from './album.js';
+import { shutter } from './shutter.js';
 
 const $ = (id) => document.getElementById(id);
 const MAX_PHOTO_PX = 1280;
@@ -62,6 +63,7 @@ function renderIntro() {
   $('btn-resume').className = 'btn btn-primary';
   if (inProgress) $('btn-resume').after($('btn-start'));
   show('intro');
+  shutter($('intro-title'), HUNT.title);
 }
 
 function warmUpModel() {
@@ -299,7 +301,7 @@ async function acceptPhoto(verified, info = {}) {
 function showFound(gem) {
   const last = progress.index >= GEMS.length;
   $('found-counter').textContent = `Gem ${progress.index} of ${GEMS.length} found`;
-  $('found-name').textContent = gem.name;
+  shutter($('found-name'), gem.name);
   $('found-photo').src = pending.url;
   $('found-fact').textContent = gem.fact;
   $('btn-next').textContent = last ? 'See your album' : 'Next clue';
@@ -419,6 +421,8 @@ $('btn-reset').addEventListener('click', onReset);
 
 if (judge) $('judge-badge').hidden = false;
 document.title = `${HUNT.title} · Bucknell`;
+// Tapping the title replays the shutter, like the original's re-shutter button.
+$('intro-title').addEventListener('click', () => shutter($('intro-title'), HUNT.title));
 warmUpModel();
 if (progress.finishedAt) showAlbum();
 else renderIntro();

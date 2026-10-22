@@ -2,7 +2,7 @@
 // the AI model, library and images are cache-first (big and rarely change).
 // Bump VERSION when the model or reference photos change.
 
-const VERSION = 'v4';
+const VERSION = 'v5';
 const CACHE = `hidden-gems-${VERSION}`;
 const PRECACHE = [
   './',
@@ -14,6 +14,7 @@ const PRECACHE = [
   'vision.js',
   'store.js',
   'album.js',
+  'shutter.js',
   'manifest.webmanifest',
   'icons/icon.svg',
   'icons/icon-192.png',
