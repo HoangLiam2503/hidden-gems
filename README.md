@@ -9,7 +9,7 @@
 Most people walk past these spots every day without seeing them. Hidden Gems turns a five-minute walk from Taylor Hall to the Rooke Science Center into four small discoveries:
 
 1. **Where Careers Take Root:** a little brick house named for plants that now grows careers.
-2. **Where It All Began:** the first building on College Hill (1849). It's a twist, because it's right behind you.
+2. **Messages from Another Time:** a marble slab by artist Agnes Denes (1986) that carries humanity's great equations, tucked beside a quiet science entrance.
 3. **The Tree in a Stone Cloak:** a weeping tree in its own ring of fieldstone that thousands of students pass without looking up.
 4. **The Elements Underfoot:** a rainbow periodic table chalked at the foot of Rooke's grand staircase.
 
@@ -20,7 +20,7 @@ Each clue is a small riddle. Each spot pays off with a fact you can tell your fr
 1. **Read the clue.** A heat meter glows hotter as you get closer, but it never shows the exact spot.
 2. **Take the photo.** The app checks two things:
    - **Location:** GPS has to put you inside the gem's radius. The check allows for GPS inaccuracy.
-   - **Photo match:** an AI model runs on your phone (MobileNet v2 in TensorFlow.js) and compares your photo with reference shots of the spot. The photo has to clear that gem's threshold and also match it better than any other gem, so two look-alike brick buildings next to each other aren't confused. No photo ever leaves your phone.
+   - **Photo match:** an AI model runs on your phone (MobileNet v2 in TensorFlow.js) and compares your photo with reference shots of the spot. The photo has to clear that gem's threshold and also match it better than any other gem, so look-alike brick spots aren't confused. No photo ever leaves your phone.
 3. **Unlock the next clue.** After the last gem you get your album and a collage you can share.
 
 **Nobody gets stuck:**

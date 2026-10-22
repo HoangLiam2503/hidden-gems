@@ -208,8 +208,8 @@ async function checkPhoto(gem, img, strict) {
     const emb = await embedImage(img);
     const score = await scorePhoto(emb, gem);
     if (score === null) return { status: 'skip', text: 'No reference photos for this gem yet' };
-    // Neighbouring gems can look alike (Botany and Taylor are both brick and
-    // trim), so the photo must also match this gem better than any other.
+    // Neighbouring gems can look alike (most of campus is red brick), so the
+    // photo must also match this gem better than any other.
     let rival = -1;
     for (const other of GEMS) {
       if (other.id === gem.id) continue;

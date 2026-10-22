@@ -2,7 +2,7 @@
 // the AI model, library and images are cache-first (big and rarely change).
 // Bump VERSION when the model or reference photos change.
 
-const VERSION = 'v3';
+const VERSION = 'v4';
 const CACHE = `hidden-gems-${VERSION}`;
 const PRECACHE = [
   './',
@@ -26,9 +26,9 @@ const PRECACHE = [
   'gems/botany/ref1.jpg',
   'gems/botany/ref2.jpg',
   'gems/botany/ref3.jpg',
-  'gems/taylor/ref1.jpg',
-  'gems/taylor/ref2.jpg',
-  'gems/taylor/ref3.jpg',
+  'gems/stele/ref1.jpg',
+  'gems/stele/ref2.jpg',
+  'gems/stele/ref3.jpg',
   'gems/weeping/ref1.jpg',
   'gems/weeping/ref2.jpg',
   'gems/weeping/ref3.jpg',
