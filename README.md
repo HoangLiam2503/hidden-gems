@@ -2,15 +2,15 @@
 
 **Team:** _TODO: team name and members_
 
-**Play it:** _TODO: GitHub Pages link_ · works on iPhone (Safari) and Android (Chrome). Add it to your home screen to use it like an app.
+**Play it:** https://hoangliam2503.github.io/hidden-gems/ · works on iPhone (Safari) and Android (Chrome). Add it to your home screen to use it like an app.
 
 ## Why it's worth playing
 
 Most people walk past these spots every day without seeing them. Hidden Gems turns a five-minute walk from Taylor Hall to the Rooke Science Center into four small discoveries:
 
-1. **Where Careers Take Root:** a little brick house named for plants that now grows careers.
+1. **The Tree in a Stone Cloak:** a weeping tree in its own ring of fieldstone that thousands of students pass without looking up.
 2. **Messages from Another Time:** a marble slab by artist Agnes Denes (1986) that carries humanity's great equations, tucked beside a quiet science entrance.
-3. **The Tree in a Stone Cloak:** a weeping tree in its own ring of fieldstone that thousands of students pass without looking up.
+3. **Where Careers Take Root:** a little brick house named for plants that now grows careers.
 4. **The Elements Underfoot:** a rainbow periodic table chalked at the foot of Rooke's grand staircase.
 
 Each clue is a small riddle. Each spot pays off with a fact you can tell your friends. At the end you get an album of your photos to share.
