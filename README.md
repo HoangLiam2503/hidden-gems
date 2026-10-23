@@ -1,6 +1,6 @@
 # Hidden Gems: The Best of Bucknell
 
-**Team:** _TODO: team name and members_
+**Team:** 455 MCD (Luke Sokolofsky, Liam Nguyen)
 
 **Play it:** https://hoangliam2503.github.io/hidden-gems/ · works on iPhone (Safari) and Android (Chrome). Add it to your home screen to use it like an app.
 
