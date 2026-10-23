@@ -13,6 +13,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Hidden Gems">
+  <link rel="preload" href="fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="styles.css">
   <script src="vendor/tf.min.js" defer></script>
   <script src="app.js" type="module"></script>
@@ -22,26 +23,36 @@
 
   <!-- Intro -->
   <section class="screen screen-intro" id="screen-intro">
-    <figure class="intro-photo">
-      <img src="images/taylor-hall.jpg" width="1200" height="1500"
-        alt="The carved stone arch reading TAYLOR HALL over a brick entrance, framed by crabapple branches">
-      <figcaption>Taylor Hall, 1849<span class="cap-long">, the first building on College Hill</span>. The hunt starts next door.</figcaption>
-    </figure>
+    <div class="intro-bg" aria-hidden="true">
+      <div class="dots"></div>
+      <div class="bars">
+        <i style="--h:14%; --p:0s"></i><i style="--h:21%; --p:-1.2s"></i><i style="--h:28%; --p:-2.4s"></i>
+        <i style="--h:35%; --p:-3.6s"></i><i style="--h:41%; --p:-4.8s"></i><i style="--h:47%; --p:-6s"></i>
+      </div>
+    </div>
+    <div class="floats" aria-hidden="true">
+      <img class="float f1" src="images/float/library-tower.jpg" width="268" height="397" alt="">
+      <img class="float f2" src="images/float/hildreth.jpg" width="640" height="525" alt="">
+      <img class="float f3" src="images/float/taylor-arch.jpg" width="640" height="160" alt="">
+      <img class="float f4" src="images/float/magnolia.jpg" width="480" height="396" alt="">
+      <img class="float f5" src="images/float/taylor-window.jpg" width="504" height="330" alt="">
+      <img class="float f6" src="images/float/library-front.jpg" width="415" height="398" alt="">
+    </div>
     <div class="intro-copy">
       <p class="eyebrow brand">
-        <svg class="mark" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1 19 7.5 10 19 1 7.5Z" fill="#003865"/><path d="M10 1 19 7.5H10Z M1 7.5H10V19Z" fill="#e87722"/></svg>
+        <svg class="mark" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1 19 7.5 10 19 1 7.5Z" fill="#fff8ef"/><path d="M10 1 19 7.5H10Z M1 7.5H10V19Z" fill="#e87722"/></svg>
         A Bucknell campus photo hunt
       </p>
       <h1 id="intro-title">Hidden Gems</h1>
       <p class="lede"><span id="stop-count">Four</span> corners of campus most people walk right past, and a clue to each one.</p>
       <ol class="how">
-        <li><span class="num">1</span><p><strong>Follow the clue.</strong> Find a hidden corner of campus.</p></li>
-        <li><span class="num">2</span><p><strong>Capture the spot.</strong> Take a photo when you arrive.</p></li>
-        <li><span class="num">3</span><p><strong>Unlock the next stop.</strong> We check your location and photo, then the next clue opens.</p></li>
+        <li><span class="num">01</span><p><strong>Follow the clue.</strong> Find a hidden corner of campus.</p></li>
+        <li><span class="num">02</span><p><strong>Capture the spot.</strong> Take a photo when you arrive.</p></li>
+        <li><span class="num">03</span><p><strong>Unlock the next stop.</strong> We check your location and photo, then the next clue opens.</p></li>
       </ol>
       <div class="intro-actions">
-        <button class="btn btn-primary" id="btn-resume" hidden>Continue your hunt</button>
-        <button class="btn btn-primary" id="btn-start">Start the hunt</button>
+        <button class="btn btn-primary magnetic" id="btn-resume" hidden>Continue your hunt</button>
+        <button class="btn btn-primary magnetic" id="btn-start">Start the hunt</button>
         <p class="fineprint">Uses your camera and location during the hunt. Photos stay on your phone.</p>
       </div>
     </div>
@@ -95,8 +106,10 @@
 
   <!-- Found -->
   <section class="screen screen-found" id="screen-found" hidden>
-    <p class="eyebrow" id="found-counter"></p>
-    <h2 id="found-name"></h2>
+    <header class="found-head">
+      <p class="eyebrow" id="found-counter"></p>
+      <h2 id="found-name"></h2>
+    </header>
     <img class="found-photo" id="found-photo" alt="">
     <div class="card fact">
       <p class="eyebrow">Hidden fact</p>

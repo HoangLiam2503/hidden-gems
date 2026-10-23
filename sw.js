@@ -2,7 +2,7 @@
 // the AI model, library and images are cache-first (big and rarely change).
 // Bump VERSION when the model or reference photos change.
 
-const VERSION = 'v6';
+const VERSION = 'v7';
 const CACHE = `hidden-gems-${VERSION}`;
 const PRECACHE = [
   './',
@@ -15,8 +15,15 @@ const PRECACHE = [
   'store.js',
   'album.js',
   'shutter.js',
+  'magnetic.js',
+  'fonts/inter-latin-wght-normal.woff2',
   'manifest.webmanifest',
-  'images/taylor-hall.jpg',
+  'images/float/library-tower.jpg',
+  'images/float/hildreth.jpg',
+  'images/float/taylor-arch.jpg',
+  'images/float/magnolia.jpg',
+  'images/float/taylor-window.jpg',
+  'images/float/library-front.jpg',
   'icons/icon.svg',
   'icons/icon-192.png',
   'icons/icon-512.png',
@@ -50,7 +57,7 @@ self.addEventListener('activate', (e) => {
   })());
 });
 
-const cacheFirst = /\/(vendor|model|gems|icons)\//;
+const cacheFirst = /\/(vendor|model|gems|icons|fonts|images)\//;
 
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);

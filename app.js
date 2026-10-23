@@ -4,6 +4,7 @@ import { loadModel, loadImage, embedImage, scorePhoto, refEmbeddings, refUrl } f
 import { loadProgress, saveProgress, freshProgress, savePhoto, clearPhotos } from './store.js';
 import { albumEntries, buildCollage, shareOrDownload, formatDuration } from './album.js';
 import { shutter } from './shutter.js';
+import { magnetize } from './magnetic.js';
 
 const $ = (id) => document.getElementById(id);
 const MAX_PHOTO_PX = 1280;
@@ -449,6 +450,7 @@ if (judge) $('judge-badge').hidden = false;
 document.title = `${HUNT.title} · Bucknell`;
 // Tapping the title replays the shutter, like the original's re-shutter button.
 $('intro-title').addEventListener('click', () => shutter($('intro-title'), HUNT.title));
+magnetize([$('btn-resume'), $('btn-start')]);
 warmUpModel();
 if (progress.finishedAt) showAlbum();
 else renderIntro();

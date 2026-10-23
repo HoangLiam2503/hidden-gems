@@ -40,14 +40,20 @@ function coverCrop(ctx, img, x, y, w, h) {
   ctx.drawImage(img, (img.naturalWidth - sw) / 2, (img.naturalHeight - sh) / 2, sw, sh, x, y, w, h);
 }
 
-function roundRect(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
-  ctx.closePath();
+const FONT = 'Inter, system-ui, -apple-system, sans-serif';
+const PEACH = '#f4b78f';
+
+// The hero's slitted-glass bars, as a strip across the collage.
+function glassStrip(ctx, x, y, w, h) {
+  const n = 6, bw = w / n;
+  for (let i = 0; i < n; i++) {
+    const bh = h * (0.35 + 0.65 * (i + 1) / n);
+    const g = ctx.createLinearGradient(0, y + h, 0, y + h - bh);
+    g.addColorStop(0, CREAM); g.addColorStop(0.18, PEACH); g.addColorStop(0.42, ORANGE);
+    g.addColorStop(0.78, 'rgba(11, 74, 128, .92)'); g.addColorStop(1, 'rgba(0, 56, 101, 0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(x + i * bw, y + h - bh, bw - 2, bh);
+  }
 }
 
 export async function buildCollage(entries, progress) {
@@ -55,56 +61,53 @@ export async function buildCollage(entries, progress) {
   const tile = (W - PAD * 2 - GAP * (COLS - 1)) / COLS;
   const caption = 64;
   const rows = Math.ceil(entries.length / COLS);
-  const header = 230, footer = 110;
+  const header = 340, footer = 110;
   const H = header + rows * (tile + caption + GAP) - GAP + footer;
 
+  // Canvas only uses a web font once it has loaded.
+  try { await Promise.all([document.fonts.load(`800 76px ${FONT}`), document.fonts.load(`600 30px ${FONT}`)]); } catch { /* fallback font */ }
   const c = document.createElement('canvas');
   c.width = W; c.height = H;
   const ctx = c.getContext('2d');
   ctx.fillStyle = NAVY;
   ctx.fillRect(0, 0, W, H);
 
-  ctx.fillStyle = ORANGE;
-  ctx.font = '700 30px system-ui, -apple-system, sans-serif';
+  ctx.fillStyle = PEACH;
+  ctx.font = `700 26px ${FONT}`;
   ctx.fillText(HUNT.subtitle.toUpperCase(), PAD, 92);
   ctx.fillStyle = CREAM;
-  ctx.font = '800 76px Georgia, "Times New Roman", serif';
+  ctx.font = `800 84px ${FONT}`;
   ctx.fillText(HUNT.title, PAD, 168);
   const dur = progress.finishedAt && progress.startedAt ? ' · ' + formatDuration(progress.finishedAt - progress.startedAt) : '';
-  ctx.font = '500 28px system-ui, -apple-system, sans-serif';
+  ctx.font = `500 28px ${FONT}`;
   ctx.globalAlpha = 0.8;
-  ctx.fillText(`${entries.length} gems found${dur}`, PAD, 210);
+  ctx.fillText(`${entries.length} gems found${dur}`, PAD, 212);
   ctx.globalAlpha = 1;
+  glassStrip(ctx, 0, 236, W, 76);
 
   for (let i = 0; i < entries.length; i++) {
     const { gem, blob } = entries[i];
     const x = PAD + (i % COLS) * (tile + GAP);
     const y = header + Math.floor(i / COLS) * (tile + caption + GAP);
     const img = await blobToImage(blob);
-    ctx.save();
-    roundRect(ctx, x, y, tile, tile, 24);
-    ctx.clip();
     coverCrop(ctx, img, x, y, tile, tile);
-    ctx.restore();
     URL.revokeObjectURL(img.src);
 
-    ctx.fillStyle = ORANGE;
-    ctx.beginPath();
-    ctx.arc(x + 40, y + 40, 22, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.font = '800 24px system-ui, -apple-system, sans-serif';
+    ctx.fillStyle = NAVY;
+    ctx.fillRect(x, y, 56, 48);
+    ctx.fillStyle = PEACH;
+    ctx.font = `700 22px ${FONT}`;
     ctx.textAlign = 'center';
-    ctx.fillText(String(i + 1), x + 40, y + 49);
+    ctx.fillText(String(i + 1).padStart(2, '0'), x + 28, y + 32);
     ctx.textAlign = 'left';
 
     ctx.fillStyle = CREAM;
-    ctx.font = '700 30px system-ui, -apple-system, sans-serif';
+    ctx.font = `600 30px ${FONT}`;
     ctx.fillText(gem.name, x + 4, y + tile + 44, tile - 8);
   }
 
-  ctx.fillStyle = ORANGE;
-  ctx.font = '600 26px system-ui, -apple-system, sans-serif';
+  ctx.fillStyle = PEACH;
+  ctx.font = `600 24px ${FONT}`;
   ctx.fillText('◆  Bucknell University · ' + new Date(progress.finishedAt || Date.now()).toLocaleDateString(), PAD, H - 48);
 
   return new Promise((resolve) => c.toBlob(resolve, 'image/jpeg', 0.9));
