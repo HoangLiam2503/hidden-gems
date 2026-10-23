@@ -25,7 +25,7 @@ Each clue is a small riddle. Each spot pays off with a fact you can tell your fr
 
 **Nobody gets stuck:**
 - Hints come in steps.
-- After two misses you get a blurred photo hint.
+- After the text hints, you can ask for one last hint: a blurred photo of the spot.
 - If a check fails, the app tells you whether it was the place or the shot.
 - If location is turned off, the app checks the photo only, with a stricter match.
 - After three misses you can keep your photo and move on.

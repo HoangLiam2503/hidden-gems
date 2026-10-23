@@ -129,16 +129,20 @@ function renderHints() {
     p.textContent = h;
     box.appendChild(p);
   });
-  const photoHint = progress.attempts >= 2 && gem.refs.length > 0;
-  if (photoHint) {
+  // The blurry photo is the last hint and only appears when the player asks
+  // for it after the text hints; otherwise it gives the spot away too easily.
+  const hasPhotoHint = gem.refs.length > 0;
+  if (hasPhotoHint && progress.hintsShown > gem.hints.length) {
     const fig = document.createElement('figure');
     fig.innerHTML = '<img alt=""><figcaption>A blurry peek at the spot.</figcaption>';
     fig.querySelector('img').src = refUrl(gem, gem.refs[0]);
     box.appendChild(fig);
   }
-  const more = progress.hintsShown < gem.hints.length;
-  $('btn-hint').hidden = !more;
-  $('btn-hint').textContent = progress.hintsShown ? 'Another hint?' : 'Need a hint?';
+  const totalHints = gem.hints.length + (hasPhotoHint ? 1 : 0);
+  $('btn-hint').hidden = progress.hintsShown >= totalHints;
+  $('btn-hint').textContent = progress.hintsShown === 0 ? 'Need a hint?'
+    : progress.hintsShown === gem.hints.length ? 'Still stuck? Show a blurry photo'
+      : 'Another hint?';
 }
 
 function renderHeat() {
@@ -306,7 +310,7 @@ async function onPhotoChosen(file) {
     title = 'Close, but not that shot';
     body = 'Frame the thing the clue describes so it fills most of the photo, in good light, and try again.';
   }
-  if (progress.attempts >= 2 && gem.refs.length) body += ' A photo hint is now waiting on the clue screen.';
+  if (progress.attempts >= 2) body += ' Stuck? Go back to the clue and tap "Need a hint?".';
   $('result-title').textContent = title;
   $('result-body').textContent = body;
   $('btn-keep').hidden = !(judge || progress.attempts >= KEEP_AFTER_FAILS);
