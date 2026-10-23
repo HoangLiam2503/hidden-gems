@@ -133,6 +133,22 @@
     </div>
   </section>
 
+  <!-- Location notice: shown before play when location isn't on yet -->
+  <div class="gate" id="loc-gate" role="dialog" aria-modal="true" aria-labelledby="gate-title" hidden>
+    <div class="gate-panel">
+      <p class="eyebrow">Before you start</p>
+      <h2 id="gate-title">Turn on location</h2>
+      <p class="gate-body">Hidden Gems checks that you're really at each stop. With location on, the heat meter guides you and your photos match more easily.</p>
+      <p class="gate-status" id="gate-status" aria-live="polite" hidden></p>
+      <div class="gate-help" id="gate-help" hidden></div>
+      <p class="gate-fallback" id="gate-fallback">No location? You can still play. We'll check your photos only, and they need a closer match.</p>
+      <div class="gate-actions">
+        <button class="btn btn-primary" id="gate-primary">Turn on location</button>
+        <button class="btn btn-ghost" id="gate-skip">Got it, check my photos only</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast" role="status" hidden></div>
 </body>
 </html>

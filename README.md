@@ -27,7 +27,7 @@ Each clue is a small riddle. Each spot pays off with a fact you can tell your fr
 - Hints come in steps.
 - After the text hints, you can ask for one last hint: a blurred photo of the spot.
 - If a check fails, the app tells you whether it was the place or the shot.
-- If location is turned off, the app checks the photo only, with a stricter match.
+- If location is off or blocked, a notice before the hunt explains how to turn it on (with steps for iPhone or Android). Players who skip it tap "Got it" and play with photo checks only, at a stricter match.
 - After three misses you can keep your photo and move on.
 - Progress and photos survive closing the app.
 

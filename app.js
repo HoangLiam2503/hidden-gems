@@ -16,6 +16,7 @@ const GPS_SLOW_MS = 15000;
 let progress = loadProgress();
 let lastFix = null;      // {lat, lng, accuracy, at} or {denied: true}
 let gpsSlow = false;     // no fix yet after GPS_SLOW_MS on this clue
+let photoOnly = false;   // player chose to play without location
 let stopWatch = () => {};
 let modelState = 'loading';
 let pending = null;      // the photo being checked: {blob, url}
@@ -152,7 +153,7 @@ function renderHeat() {
   if (!locationRequired(progress.index)) {
     heat.dataset.level = '4';
     label.textContent = 'Judge mode: location not required for this gem';
-  } else if (lastFix?.denied) {
+  } else if (photoOnly || lastFix?.denied) {
     heat.dataset.level = '';
     label.textContent = 'Location is off — we will check your photo only.';
   } else if (!lastFix) {
@@ -177,14 +178,14 @@ function showClue() {
   gpsSlow = false;
   renderHeat();
   stopWatch();
-  const stopGps = watchPosition((fix) => {
+  const stopGps = photoOnly ? () => {} : watchPosition((fix) => {
     lastFix = { ...fix, at: Date.now() };
     renderHeat();
   }, () => {
     lastFix = { denied: true };
     renderHeat();
   });
-  const slowTimer = setTimeout(() => { gpsSlow = true; renderHeat(); }, GPS_SLOW_MS);
+  const slowTimer = photoOnly ? 0 : setTimeout(() => { gpsSlow = true; renderHeat(); }, GPS_SLOW_MS);
   stopWatch = () => { stopGps(); clearTimeout(slowTimer); };
   // Fingerprint the reference photos now so the check is instant later; the
   // check compares against every gem, current one first.
@@ -221,6 +222,7 @@ function setCheck(id, state, text) {
 
 async function checkLocation(gem, index) {
   if (!locationRequired(index)) return { status: 'skip', text: 'Judge mode — skipped' };
+  if (photoOnly) return { status: 'unavailable', text: 'Location off — checking the photo only' };
   let fix = lastFix && !lastFix.denied && Date.now() - lastFix.at < FIX_MAX_AGE_MS ? lastFix : null;
   if (!fix) {
     const p = await getPosition();
@@ -420,16 +422,118 @@ function onReset() {
 
 /* ---------- wiring ---------- */
 
+/* ---------- location notice ---------- */
+// Web pages can't switch location on or open Settings, so when it isn't on
+// yet we explain how, and the player has to acknowledge photo-only play.
+
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+  || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isAndroid = /Android/i.test(navigator.userAgent);
+
+const GATE_HELP = {
+  ios: `<strong>Location is blocked for this site. To allow it:</strong>
+    <ol><li>Tap <strong>aA</strong> on the left of the address bar.</li>
+    <li>Tap <strong>Website Settings</strong> → <strong>Location</strong> → <strong>Allow</strong>.</li>
+    <li>Come back here and tap <strong>Check again</strong>.</li></ol>
+    <p class="note">Still blocked? Settings → Privacy &amp; Security → Location Services: turn it on, and set Safari Websites to "While Using".</p>`,
+  android: `<strong>Location is blocked for this site. To allow it:</strong>
+    <ol><li>Tap the icon on the left of the address bar.</li>
+    <li>Tap <strong>Permissions</strong> → <strong>Location</strong> → <strong>Allow</strong>.</li>
+    <li>Come back here and tap <strong>Check again</strong>.</li></ol>
+    <p class="note">Also make sure Location is switched on in your phone's quick settings.</p>`,
+  other: `<strong>Location is blocked for this site.</strong> Allow location in your browser's site settings, then tap <strong>Check again</strong>.`,
+};
+
+async function geoPermission() {
+  try { return await navigator.permissions.query({ name: 'geolocation' }); } catch { return null; }
+}
+
+let gateNext = null;
+let gateState = 'ask';
+
+function renderGate(state) {
+  gateState = state;
+  const status = $('gate-status');
+  const primary = $('gate-primary');
+  const on = state === 'on' || state === 'nofix';
+  status.hidden = state === 'ask';
+  status.className = 'gate-status' + (state === 'on' ? ' on' : state === 'blocked' ? ' blocked' : '');
+  status.textContent = {
+    asking: 'Waiting for your answer…',
+    on: '✓ Location is on.',
+    nofix: '✓ Location is allowed. No GPS signal yet: step outside and the heat meter will catch up.',
+    blocked: 'Location is blocked, so only your photos will be checked.',
+  }[state] || '';
+  $('gate-help').hidden = state !== 'blocked';
+  $('gate-help').innerHTML = state === 'blocked' ? GATE_HELP[isIOS ? 'ios' : isAndroid ? 'android' : 'other'] : '';
+  primary.disabled = state === 'asking';
+  primary.textContent = on ? 'Start the hunt' : state === 'blocked' ? 'Check again' : state === 'asking' ? 'Asking…' : 'Turn on location';
+  $('gate-skip').hidden = on;
+  $('gate-fallback').hidden = on;
+}
+
+function closeGate() {
+  $('loc-gate').hidden = true;
+  const next = gateNext;
+  gateNext = null;
+  if (next) next();
+}
+
+async function requestLocation() {
+  renderGate('asking');
+  const p = await getPosition({ timeout: 10000 });
+  if (p && !p.denied) {
+    lastFix = { ...p, at: Date.now() };
+    renderGate('on');
+  } else if (p?.denied) {
+    lastFix = { denied: true };
+    renderGate('blocked');
+  } else {
+    // No fix in time; the permission itself may still have been granted.
+    const perm = await geoPermission();
+    renderGate(perm?.state === 'denied' ? 'blocked' : perm?.state === 'granted' ? 'nofix' : 'ask');
+  }
+}
+
+// Runs next() straight away when location is already allowed; otherwise shows
+// the notice first.
+async function withLocation(next) {
+  const perm = await geoPermission();
+  if (perm?.state === 'granted') {
+    photoOnly = false;
+    getPosition({ timeout: 8000 }).then((p) => { if (p && !p.denied) lastFix = { ...p, at: Date.now() }; });
+    next();
+    return;
+  }
+  gateNext = next;
+  renderGate(perm?.state === 'denied' ? 'blocked' : 'ask');
+  $('loc-gate').hidden = false;
+  $('gate-primary').focus();
+  // If the player allows location in Settings and comes back, pick it up.
+  if (perm) perm.onchange = () => { if (!$('loc-gate').hidden && perm.state === 'granted') requestLocation(); };
+}
+
+$('gate-primary').addEventListener('click', () => {
+  if (gateState === 'on' || gateState === 'nofix') {
+    photoOnly = false;
+    closeGate();
+  } else {
+    requestLocation();
+  }
+});
+$('gate-skip').addEventListener('click', () => {
+  photoOnly = true;
+  closeGate();
+});
+
 function beginHunt() {
-  // Ask for location now (during a tap) so the prompt isn't a surprise later.
-  getPosition({ timeout: 8000 }).then((p) => { if (p) lastFix = p.denied ? p : { ...p, at: Date.now() }; });
-  startHunt();
+  withLocation(startHunt);
 }
 $('btn-start').addEventListener('click', () => {
   if (inProgress()) armConfirm($('btn-start'), 'Start over', 'Tap again to erase your progress', beginHunt);
   else beginHunt();
 });
-$('btn-resume').addEventListener('click', () => (progress.finishedAt ? showAlbum() : showClue()));
+$('btn-resume').addEventListener('click', () => (progress.finishedAt ? showAlbum() : withLocation(showClue)));
 $('btn-hint').addEventListener('click', () => {
   progress.hintsShown += 1;
   saveProgress(progress);
