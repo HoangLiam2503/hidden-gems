@@ -33,7 +33,23 @@ Each clue is a small riddle. Each spot pays off with a fact you can tell your fr
 
 ## For judges
 
-Gem 1 is within 500 ft of Taylor Hall. To play the whole hunt from the showcase room, open the app with **`?judge=1`** added to the link. Gem 1 is still checked for real. After that, location is skipped, match scores are shown, and you can keep any photo to continue. Open it with `?judge=0` to turn judge mode off.
+Stop 1 (the weeping tree) is about 280 ft from Taylor Hall. To play the whole hunt from the showcase room, open the app with **`?judge=1`** added to the link:
+
+https://hoangliam2503.github.io/hidden-gems/?judge=1
+
+| | Normal mode | Judge mode |
+|---|---|---|
+| **Stop 1** | Location + photo checked | Same: checked for real |
+| **Location at stops 2–4** | Must be at the spot | Skipped |
+| **Photo check at stops 2–4** | Yes | Still runs, and shows the match score (score / needed / best other stop) |
+| **"Keep this photo & move on"** | After 3 misses | Right after the first miss |
+| **Badge** | None | "Judge mode" in the top-right corner |
+
+Hints, the found screens, the album and the collage work the same in both modes.
+
+**In practice:** walk to the tree and play stop 1 for real. At stops 2–4 a photo taken in the showcase room won't match, so tap "Keep this photo & move on" to continue to the album.
+
+Judge mode is remembered on that device. Open the link with `?judge=0` to turn it off.
 
 ## Building your own hunt (team notes)
 
